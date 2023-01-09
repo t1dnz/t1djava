@@ -152,20 +152,22 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
     private var accessToken: String = ""
     private var accessTokenExpiry: LocalDateTime = LocalDateTime.now().minusDays(10) // force reauth at first
 
-    // Client code
-    private val retrofit: Retrofit by lazy {
+    private val okclient: OkHttpClient by lazy {
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client: OkHttpClient = OkHttpClient.Builder()
+        OkHttpClient.Builder()
             .addInterceptor(logging)
             .build()
+    }
 
+    // Client code
+    private val retrofit: Retrofit by lazy {
         val gson = GsonBuilder()
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
             .create()
 
         Retrofit.Builder()
-            .client(client)
+            .client(okclient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .baseUrl(BASE_URL)
             .build()
@@ -204,6 +206,12 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
         return accessToken
     }
 
+    fun closeConnections(): Unit {
+      // Stupid workaround to the issue of main hanging
+      // https://github.com/square/retrofit/issues/3144
+            okclient.dispatcher.executorService.shutdown()
+          okclient.connectionPool.evictAll()
+    }
     suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): List<DiasendDatum>? {
         val fmtr = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
         val date_from_str = date_from.format(fmtr)
