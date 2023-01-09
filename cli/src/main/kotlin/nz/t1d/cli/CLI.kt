@@ -48,7 +48,8 @@ fun diasendCommand(): CliktCommand {
                 dc.getPatientData(date_from=dateFrom, date_to = dateTo)
                 dc.closeConnections()
             }
-
+            
+            println()
             // TODO output to a standard file format
         }
     }
