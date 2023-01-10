@@ -14,6 +14,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.logging.Logger
+import nz.t1d.datamodels.*
+import java.time.ZoneId
 
 /*
 mostly documented here https://github.com/PatrikTrestik/diasend-upload/blob/master/doc/diasend-api/DiasendAPI-1.0.0.yaml
@@ -209,18 +211,47 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
     fun closeConnections(): Unit {
       // Stupid workaround to the issue of main hanging
       // https://github.com/square/retrofit/issues/3144
-            okclient.dispatcher.executorService.shutdown()
-          okclient.connectionPool.evictAll()
+      okclient.dispatcher.executorService.shutdown()
+      okclient.connectionPool.evictAll()
     }
-    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): List<DiasendDatum>? {
+
+    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): DataCollection {
         val fmtr = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
         val date_from_str = date_from.format(fmtr)
         val date_to_str = date_to.format(fmtr)
-        return diasendClient.patientData(
+        val diasendPatientData = diasendClient.patientData(
             "Bearer ${getAccessToken()}",
             "combined",
             date_from = date_from_str,
             date_to = date_to_str,
             ).body()
+
+        val dc = DataCollection()
+        if (diasendPatientData == null) {
+          return dc
+        }
+
+        for (d in diasendPatientData) {
+            var ld = d.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+            when (d.type) {
+                "insulin_bolus" -> {
+                    dc.insulinBoluses.add(BolusInsulin(d.totalValue, ld))
+                }
+                "carb" -> {
+                    dc.carbs.add(CarbIntake(d.value, ld))
+                }
+                "insulin_basal" -> {
+                    dc.insulinBasalChanges.add(BasalInsulinChange(d.value, ld))
+                }
+                "glucose" -> {
+                    dc.bglReadings.add(BGLReading(d.value, ld))
+                }
+                else -> {
+                    Log.info("UNKNOWN DIASEND TYPE ${d.type}")
+                }
+            }
+        }
+
+        return dc
     }
 }
