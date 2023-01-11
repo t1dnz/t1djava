@@ -215,7 +215,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
       okclient.connectionPool.evictAll()
     }
 
-    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): DataCollection {
+    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): T1DInputs {
         val fmtr = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
         val date_from_str = date_from.format(fmtr)
         val date_to_str = date_to.format(fmtr)
@@ -226,7 +226,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
             date_to = date_to_str,
             ).body()
 
-        val dc = DataCollection()
+        val dc = T1DInputs()
         if (diasendPatientData == null) {
           return dc
         }

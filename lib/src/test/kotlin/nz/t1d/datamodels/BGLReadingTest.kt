@@ -4,8 +4,8 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import java.time.LocalDateTime
 
-class BolusTest {
+class BGLReadingTest {
     @Test fun Initializes() {
-        val model = BolusInsulin(value=1.2f, time=LocalDateTime.now())
+        val model = BGLReading(value=1.2f, time=LocalDateTime.now())
     }
 }

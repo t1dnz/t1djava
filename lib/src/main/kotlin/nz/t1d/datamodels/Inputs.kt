@@ -158,21 +158,7 @@ data class BGLReading(
 }
 
 
-object dataComparitor : Comparator<BaseDataClass> {
-    override fun compare(p0: BaseDataClass?, p1: BaseDataClass?): Int {
-        if (p1 == null || p0 == null) {
-            return 0
-        }
-        return p1.time.compareTo(p0.time)
-    }
-}
 
-class DataCollection {
-    var insulinBoluses: SortedSet<BolusInsulin> = sortedSetOf(dataComparitor)
-    var insulinBasalChanges: SortedSet<BasalInsulinChange> = sortedSetOf(dataComparitor)
-    var bglReadings: SortedSet<BGLReading> = sortedSetOf(dataComparitor)
-    var carbs: SortedSet<CarbIntake> = sortedSetOf(dataComparitor)
-}
 
 
 
