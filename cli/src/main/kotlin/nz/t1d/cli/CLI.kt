@@ -45,7 +45,11 @@ fun diasendCommand(): CliktCommand {
             val dc = DiasendClient(diasend_username=username, diasend_password=password)
             
             launch {
-                dc.getPatientData(date_from=dateFrom, date_to = dateTo)
+                try {
+                    dc.getPatientData(date_from=dateFrom, date_to = dateTo)
+                } catch (ex: Exception) {
+                    println(ex)
+                }
                 dc.closeConnections()
             }
             

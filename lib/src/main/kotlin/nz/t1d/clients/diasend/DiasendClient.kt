@@ -16,7 +16,8 @@ import java.util.*
 import java.util.logging.Logger
 import nz.t1d.datamodels.*
 import java.time.ZoneId
-
+import java.util.concurrent.TimeUnit
+ 
 /*
 mostly documented here https://github.com/PatrikTrestik/diasend-upload/blob/master/doc/diasend-api/DiasendAPI-1.0.0.yaml
 
@@ -158,6 +159,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         OkHttpClient.Builder()
+            .readTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(logging)
             .build()
     }
@@ -215,7 +217,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
       okclient.connectionPool.evictAll()
     }
 
-    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): T1DInputs {
+    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): PatientData {
         val fmtr = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
         val date_from_str = date_from.format(fmtr)
         val date_to_str = date_to.format(fmtr)
@@ -226,7 +228,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
             date_to = date_to_str,
             ).body()
 
-        val dc = T1DInputs()
+        val dc = PatientData()
         if (diasendPatientData == null) {
           return dc
         }
