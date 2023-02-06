@@ -237,16 +237,16 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
             var ld = d.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
             when (d.type) {
                 "insulin_bolus" -> {
-                    dc.insulinBoluses.add(BolusInsulin(d.totalValue, ld))
+                    dc.insulinBoluses.add(Bolus(d.totalValue, ld))
                 }
                 "carb" -> {
-                    dc.carbs.add(CarbIntake(d.value, ld))
+                    dc.carbs.add(Carb(d.value, ld))
                 }
                 "insulin_basal" -> {
-                    dc.insulinBasalChanges.add(BasalInsulinChange(d.value, ld))
+                    dc.insulinBasalChanges.add(BasalChange(d.value, ld))
                 }
                 "glucose" -> {
-                    dc.bglReadings.add(BGLReading(d.value, ld))
+                    dc.bglReadings.add(GlucoseReading(d.value, ld))
                 }
                 else -> {
                     Log.info("UNKNOWN DIASEND TYPE ${d.type}")

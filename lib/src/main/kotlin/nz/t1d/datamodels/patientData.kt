@@ -9,12 +9,22 @@ import java.time.ZoneId
 import java.util.*
 import kotlin.math.truncate
 
+
+object timeOrder : Comparator<BaseDataClass> {
+    override fun compare(p0: BaseDataClass?, p1: BaseDataClass?): Int {
+        if (p1 == null || p0 == null) {
+            return 0
+        }
+        return p1.time.compareTo(p0.time)
+    }
+}
+
 class PatientData {
 
-    var insulinBoluses: SortedSet<BolusInsulin> = sortedSetOf(timeOrder)
-    var insulinBasalChanges: SortedSet<BasalInsulinChange> = sortedSetOf(timeOrder)
-    var bglReadings: SortedSet<BGLReading> = sortedSetOf(timeOrder)
-    var carbs: SortedSet<CarbIntake> = sortedSetOf(timeOrder)
+    var insulinBoluses: SortedSet<Bolus> = sortedSetOf(timeOrder)
+    var insulinBasalChanges: SortedSet<BasalChange> = sortedSetOf(timeOrder)
+    var bglReadings: SortedSet<GlucoseReading> = sortedSetOf(timeOrder)
+    var carbs: SortedSet<Carb> = sortedSetOf(timeOrder)
 
     fun merge(pd: PatientData) {
         // Join all the data together
@@ -65,7 +75,7 @@ class PatientData {
         }
 
         // assign the previous reading to each of the bglreadings so they can self calculate diff and such
-        var futureReading: BGLReading? = null
+        var futureReading: GlucoseReading? = null
         for (d in bglReadings) {
             if (futureReading != null) {
                 futureReading.previousReading = d
@@ -81,7 +91,7 @@ class PatientData {
         // Compress Basal Changes (there are a ton of useless ones)
         var previousMinsAgo: Long = -1
         var previousValue: Float = -1f
-        val removeElemets = mutableListOf<BasalInsulinChange>()
+        val removeElemets = mutableListOf<BasalChange>()
         for (re in insulinBasalChanges) {
             if (re.minsAgo() == previousMinsAgo || re.value == previousValue) {
                 removeElemets.add(re)
@@ -109,7 +119,7 @@ class PatientData {
         }
     }
 
-    fun todaysBGLReadings(): List<BGLReading> {
+    fun todaysBGLReadings(): List<GlucoseReading> {
         val midnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
         return findEvents(midnight, LocalDateTime.now().plusMinutes(2), bglReadings)
     }
@@ -130,7 +140,7 @@ class PatientData {
 
     fun addBGlReading(reading: Float, time: LocalDateTime, unit: String, source: DATA_SOURCE) {
         // store previoud data
-        val reading = BGLReading(reading, time, unit)
+        val reading = GlucoseReading(reading, time, unit)
         reading.source = source
         bglReadings.add(reading)
         processBGLReadings()

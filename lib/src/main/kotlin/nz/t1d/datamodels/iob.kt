@@ -41,10 +41,10 @@ class BiLinearIOB(val t1d: T1DModel): IOBModel {
         return iob
     }
 
-    fun insulinBasalBoluses(t1d: T1DModel): SortedSet<BolusInsulin> {
+    fun insulinBasalBoluses(t1d: T1DModel): SortedSet<Bolus> {
     
         // Basal insulin is much harder because it is changes in a curve where the integral is the total.
-        var insulinBasalBoluses:SortedSet<BolusInsulin> = sortedSetOf(timeOrder)
+        var insulinBasalBoluses:SortedSet<Bolus> = sortedSetOf(timeOrder)
 
         // Get now every 4 minutes calculate the basal rate, add that value as a bolusChange to insulinBasalBoluses
         var basalTime = LocalDateTime.now()
@@ -69,7 +69,7 @@ class BiLinearIOB(val t1d: T1DModel): IOBModel {
                 break
             }
             // divide by 15 to make the rate per 4 mins from per hour
-            insulinBasalBoluses.add(BolusInsulin(currentBasal.value / 15.0f, basalTime))
+            insulinBasalBoluses.add(Bolus(currentBasal.value / 15.0f, basalTime))
         }
         return insulinBasalBoluses
     }

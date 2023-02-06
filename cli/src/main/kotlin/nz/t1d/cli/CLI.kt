@@ -13,8 +13,9 @@ import kotlinx.coroutines.*
 import com.charleskorn.kaml.Yaml
 import java.io.File
 import java.nio.charset.StandardCharsets
-import nz.t1d.testModels.TestSuite
 
+import nz.t1d.testmodels.TestSuite
+import nz.t1d.datamodels.Data
 // run with gradle run --args=""
 // diasend patient-data --date-from=<date> --date-to=<date>
 
@@ -37,7 +38,8 @@ fun testCommand(): CliktCommand {
             println("oh no")
             
             val filetext = file.readText()
-            
+            println(Data.javaClass)
+            println(Data.serializer())
             print(filetext)
             val result = Yaml.default.decodeFromString(TestSuite.serializer(), filetext)
             println(result)

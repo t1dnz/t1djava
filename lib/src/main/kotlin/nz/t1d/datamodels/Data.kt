@@ -11,16 +11,41 @@ import kotlin.math.truncate
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.Decoder
 
-object timeOrder : Comparator<BaseDataClass> {
-    override fun compare(p0: BaseDataClass?, p1: BaseDataClass?): Int {
-        if (p1 == null || p0 == null) {
-            return 0
-        }
-        return p1.time.compareTo(p0.time)
-    }
+object DateAsLongSerializer : KSerializer<LocalDateTime> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: LocalDateTime) = encoder.encodeString(value.toString())
+    override fun deserialize(decoder: Decoder): LocalDateTime = LocalDateTime.parse(decoder.decodeString())
 }
 
+////
+// Collection Class
+////
+
+@Serializable
+data class Data(
+    var glucose_reading: List<GlucoseReading>,
+    var carbs: List<Carb>,
+    var bolus: List<Bolus>,
+    var basal_change: List<GlucoseReading>,
+)
+
+@Serializable
+data class Profile(
+    var insulin_duration:  Int = 180,
+    var insulin_onset: Int =  20,
+    var insulin_peak: Int =  10,
+)
+
+////
+// Data Classes
+////
 interface BaseDataClass {
     val time: LocalDateTime
     var value: Float
@@ -46,22 +71,27 @@ interface BaseDataClass {
     }
 }
 
-data class BasalInsulinChange(
+@Serializable
+data class BasalChange(
     override var value: Float,
+    @Serializable(with = DateAsLongSerializer::class)
     override var time: LocalDateTime,
 ) : BaseDataClass
 
-
-data class BolusInsulin(
+@Serializable
+data class Bolus(
     override var value: Float,
+    @Serializable(with = DateAsLongSerializer::class)
     override var time: LocalDateTime,
 ) : BaseDataClass {
     // The carb intake that is associated with this bolus
-    var carbIntake: CarbIntake? = null
+    var carbIntake: Carb? = null
 }
 
-data class CarbIntake(
+@Serializable
+data class Carb(
     override var value: Float,
+    @Serializable(with = DateAsLongSerializer::class)
     override var time: LocalDateTime,
 ) : BaseDataClass
 
@@ -70,16 +100,16 @@ data class CarbIntake(
 enum class DATA_SOURCE{CAMAPS_NOTIF, DIASEND}
 
 @Serializable
-data class BGLReading(
+data class GlucoseReading(
     override var value: Float,
-    @Contextual
+    @Serializable(with = DateAsLongSerializer::class)
     override var time: LocalDateTime,
     var bglUnit: String = "mmol/L",
 ) : BaseDataClass {
     var source: DATA_SOURCE = DATA_SOURCE.DIASEND
 
     // reference to previous reading making this kind of a
-    var previousReading: BGLReading? = null
+    var previousReading: GlucoseReading? = null
 
     fun calculateDiff(): Float {
         previousReading?.let { pr ->
@@ -93,7 +123,7 @@ data class BGLReading(
 
 
     // Return the BGL reading we trust more to be correct
-    fun lessTruthy(that: BGLReading) : BGLReading {
+    fun lessTruthy(that: GlucoseReading) : GlucoseReading {
         if (source == DATA_SOURCE.DIASEND) {
             return that
         }

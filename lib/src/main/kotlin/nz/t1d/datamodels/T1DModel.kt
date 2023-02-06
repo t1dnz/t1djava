@@ -57,23 +57,23 @@ class T1DModel private constructor(var iobModel: IOBModel = NullIOBModel() ): IO
     } 
 
     // input
-    fun insulinBoluses(): SortedSet<BolusInsulin> {
+    fun insulinBoluses(): SortedSet<Bolus> {
         return patientData.insulinBoluses
     }
 
-    fun insulinBasalChanges(): SortedSet<BasalInsulinChange> {
+    fun insulinBasalChanges(): SortedSet<BasalChange> {
         return patientData.insulinBasalChanges
     }
 
-    fun bglReadings(): SortedSet<BGLReading> {
+    fun bglReadings(): SortedSet<GlucoseReading> {
         return patientData.bglReadings
     }
 
-    fun carbs(): SortedSet<CarbIntake> {
+    fun carbs(): SortedSet<Carb> {
        return patientData.carbs
     }
 
-    fun todaysBGLReadings(): List<BGLReading> {
+    fun todaysBGLReadings(): List<GlucoseReading> {
         return patientData.todaysBGLReadings()
     }
 
