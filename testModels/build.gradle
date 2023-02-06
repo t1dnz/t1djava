@@ -10,12 +10,10 @@ plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id 'org.jetbrains.kotlin.jvm' version "1.7.22"
 
-    // Apply the java-library plugin for API and implementation separation.
-    id 'application'
-}
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.22'
 
-application {
-    mainClass = "nz.t1d.cli.CLIKt"
+    // Apply the java-library plugin for API and implementation separation.
+    id 'java-library'
 }
 
 java {
@@ -24,12 +22,7 @@ java {
     }
 }
 
-
 dependencies {
-    implementation "com.github.ajalt.clikt:clikt:3.5.1"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation "com.charleskorn.kaml:kaml:0.51.0"
-    
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1'
     implementation project(':lib')
-    implementation project(':testModels')
 }

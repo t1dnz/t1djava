@@ -8,6 +8,8 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.util.*
 import kotlin.math.truncate
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 
 object timeOrder : Comparator<BaseDataClass> {
@@ -49,6 +51,7 @@ data class BasalInsulinChange(
     override var time: LocalDateTime,
 ) : BaseDataClass
 
+
 data class BolusInsulin(
     override var value: Float,
     override var time: LocalDateTime,
@@ -65,8 +68,11 @@ data class CarbIntake(
 
 
 enum class DATA_SOURCE{CAMAPS_NOTIF, DIASEND}
+
+@Serializable
 data class BGLReading(
     override var value: Float,
+    @Contextual
     override var time: LocalDateTime,
     var bglUnit: String = "mmol/L",
 ) : BaseDataClass {

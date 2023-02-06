@@ -159,7 +159,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         OkHttpClient.Builder()
-            .readTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
             .addInterceptor(logging)
             .build()
     }

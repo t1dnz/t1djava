@@ -29,3 +29,4 @@ rootProject.name = "t1d"
 
 include "cli"
 include "lib"
+include "testModels"

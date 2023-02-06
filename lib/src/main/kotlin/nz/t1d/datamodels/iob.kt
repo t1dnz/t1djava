@@ -10,24 +10,20 @@ import java.util.*
 
 // Insulin on board models
 interface IOBModel {
-    fun estimateBasalInsulinOnBoard(t1d: T1DModel): Float
-    fun estimateBolusInsulinOnboard(t1d: T1DModel): Float
-    fun estimateInsulinOnboard(t1d: T1DModel): Float {
-        return estimateBasalInsulinOnBoard(t1d) + estimateBolusInsulinOnboard(t1d)
+    fun estimateBasalInsulinOnBoard(): Float { return -1f }
+    fun estimateBolusInsulinOnboard(): Float { return -1f }
+    fun estimateInsulinOnboard(): Float {
+        return estimateBasalInsulinOnBoard() + estimateBolusInsulinOnboard()
     }
 }
 
+class NullIOBModel : IOBModel
 
-
-class BiLinearIOB: IOBModel {
-    var insulinDuration: Float = 180f
-    var insulinOnset: Float = 20f
-    var insulinPeak: Float = 60f
-
-   override fun estimateBasalInsulinOnBoard(t1d: T1DModel): Float {
+class BiLinearIOB(val t1d: T1DModel): IOBModel {
+   override fun estimateBasalInsulinOnBoard(): Float {
         var iob : Float = 0f
         for (d in this.insulinBasalBoluses(t1d)) {
-            val bolusesRemaingInsulin = valueAfterDecay(insulinOnset, insulinPeak, insulinDuration, d)
+            val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d)
             iob += bolusesRemaingInsulin
         }
 
@@ -35,10 +31,10 @@ class BiLinearIOB: IOBModel {
         
     }
 
-    override fun estimateBolusInsulinOnboard(t1d: T1DModel): Float {
+    override fun estimateBolusInsulinOnboard(): Float {
         var iob: Float  = 0f
-        for (d in t1d.insulinBoluses) {
-            val bolusesRemaingInsulin = valueAfterDecay(insulinOnset, insulinPeak, insulinDuration, d)
+        for (d in t1d.insulinBoluses()) {
+            val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d)
             iob += bolusesRemaingInsulin
         }
 
@@ -52,11 +48,10 @@ class BiLinearIOB: IOBModel {
 
         // Get now every 4 minutes calculate the basal rate, add that value as a bolusChange to insulinBasalBoluses
         var basalTime = LocalDateTime.now()
-        var insulinBasalChangesList = ArrayDeque(t1d.insulinBasalChanges.toMutableList())
+        var insulinBasalChangesList = ArrayDeque(t1d.insulinBasalChanges().toMutableList())
         var currentBasal = insulinBasalChangesList.first()
         var isEmpty = insulinBasalChangesList.isEmpty()
 
-        val now = LocalDateTime.now()
         val midnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
         val midnightMinus = midnight.minusMinutes(300L)
 

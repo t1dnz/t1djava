@@ -4,11 +4,16 @@ package nz.t1d.cli
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.required
 import nz.t1d.clients.diasend.*
 import java.time.LocalDateTime 
 import kotlinx.coroutines.*
+import com.charleskorn.kaml.Yaml
+import java.io.File
+import java.nio.charset.StandardCharsets
+import nz.t1d.testModels.TestSuite
 
 // run with gradle run --args=""
 // diasend patient-data --date-from=<date> --date-to=<date>
@@ -19,9 +24,28 @@ fun main(args: Array<String>) {
         override fun run() = Unit
     }
 
-    T1DCLI().subcommands(diasendCommand()).main(args)
+    T1DCLI().subcommands(
+        testCommand(),
+        diasendCommand()
+    ).main(args)
 }
 
+fun testCommand(): CliktCommand {
+    class TestCommand: CliktCommand(help = "test against a test yml file") {
+        val file by option( "-f", "--file", help = "test yml file to run").file(mustExist = true, canBeDir = false).required()
+        override fun run() {
+            println("oh no")
+            
+            val filetext = file.readText()
+            
+            print(filetext)
+            val result = Yaml.default.decodeFromString(TestSuite.serializer(), filetext)
+            println(result)
+            
+        }
+    }
+    return TestCommand()
+}
 
 fun diasendCommand(): CliktCommand {
     class Diasend: CliktCommand(help = "diasend client interface") {
