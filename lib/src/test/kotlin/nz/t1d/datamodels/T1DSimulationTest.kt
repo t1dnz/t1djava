@@ -35,24 +35,24 @@ class T1DModelTest {
         assertEquals(sim.stdBGL(), 0f)
     }
 
-    // @Test fun returnsBasicValues() {
-    //     val sim = T1DModel.Builder.build()
+    @Test fun returnsBasicValues() {
+        val sim = T1DModel.Builder().build()
         
-    //     val dc = T1DInputs()
+        val dc = Data()
 
-    //     dc.insulinBoluses.add(BolusInsulin(12f, LocalDateTime.now()))
+        dc.boluses.add(Bolus(12f, LocalDateTime.now()))
         
-    //     sim.addPatientData(dc)
+        sim.addData(dc)
 
-    //     assertEquals(sim.insulinOnBoard, 12f)
+        assertEquals(sim.estimateIOB(), 12f)
 
-    //     // addBGlReading
-    //     // 
+        // addBGlReading
+        // 
 
-    // }
+    }
 
     // @Test fun insulinSettingsCanChange() {
-    //     val sim = T1DModel()
+    //     val sim = T1DModel.Builder.build()
     //     sim.insulinDuration = 100f
     //     sim.insulinOnset =  10f
     //     sim.insulinPeak = 20f

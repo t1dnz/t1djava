@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 import kotlinx.coroutines.*
 import com.charleskorn.kaml.Yaml
 import java.io.File
-import java.nio.charset.StandardCharsets
 
 import nz.t1d.testmodels.TestSuite
 import nz.t1d.datamodels.Data
@@ -34,16 +33,10 @@ fun main(args: Array<String>) {
 fun testCommand(): CliktCommand {
     class TestCommand: CliktCommand(help = "test against a test yml file") {
         val file by option( "-f", "--file", help = "test yml file to run").file(mustExist = true, canBeDir = false).required()
-        override fun run() {
-            println("oh no")
-            
+        override fun run() {            
             val filetext = file.readText()
-            println(Data.javaClass)
-            println(Data.serializer())
-            print(filetext)
             val result = Yaml.default.decodeFromString(TestSuite.serializer(), filetext)
-            println(result)
-            
+            result.runTest()
         }
     }
     return TestCommand()

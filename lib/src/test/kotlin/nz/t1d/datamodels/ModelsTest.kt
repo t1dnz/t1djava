@@ -8,6 +8,7 @@ import kotlin.test.assertEquals
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
+import java.nio.file.Paths
 
 class ModelsTest {
     @Test fun Initializes() {
@@ -30,11 +31,9 @@ class ModelsTest {
         val json = Json.encodeToString(model)
         val newModel = Json.decodeFromString<Data>(json)
 
-        println(model)
-        println(json)
-        println(newModel)
         assertEquals(model, newModel)
     }
+
 }
 
 
