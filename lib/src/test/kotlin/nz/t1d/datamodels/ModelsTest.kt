@@ -20,16 +20,19 @@ class ModelsTest {
     @Test fun SerializesDeserializes() {
         val now = LocalDateTime.now()
         val model = Data(
-            glucose_reading = listOf(GlucoseReading(value=1.2f, time=now)),
-            carb            = listOf(Carb(value=1.2f, time=now)),
-            bolus           = listOf(Bolus(value=1.2f, time=now)),
-            basal_change    = listOf(BasalChange(value=1.2f, time=now))
+            glucose_readings = sortedSetOf(timeOrder, GlucoseReading(value=1.2f, time=now)),
+            carbs            = sortedSetOf(timeOrder, Carb(value=1.2f, time=now)),
+            boluses          = sortedSetOf(timeOrder, Bolus(value=1.2f, time=now)),
+            basal_changes    = sortedSetOf(timeOrder, BasalChange(value=1.2f, time=now))
         )
 
+
         val json = Json.encodeToString(model)
-        println(json)
         val newModel = Json.decodeFromString<Data>(json)
 
+        println(model)
+        println(json)
+        println(newModel)
         assertEquals(model, newModel)
     }
 }

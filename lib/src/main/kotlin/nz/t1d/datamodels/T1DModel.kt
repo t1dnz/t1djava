@@ -46,7 +46,7 @@ class T1DModel private constructor(val iobModel: IOBModel) {
     // This is the information provided by the patient or their devices
     // Some of it is a guess, some of it is incorrect, some of the data might be conflicting
     // This is why it is in its own model
-    val patientData: PatientData = PatientData()
+    val patientData: Data = Data()
 
     fun insulinDuration(): Float {
         return 180f
@@ -62,15 +62,15 @@ class T1DModel private constructor(val iobModel: IOBModel) {
 
     // input
     fun insulinBoluses(): SortedSet<Bolus> {
-        return patientData.insulinBoluses
+        return patientData.boluses
     }
 
     fun insulinBasalChanges(): SortedSet<BasalChange> {
-        return patientData.insulinBasalChanges
+        return patientData.basal_changes
     }
 
     fun bglReadings(): SortedSet<GlucoseReading> {
-        return patientData.bglReadings
+        return patientData.glucose_readings
     }
 
     fun carbs(): SortedSet<Carb> {
@@ -175,7 +175,7 @@ class T1DModel private constructor(val iobModel: IOBModel) {
         patientData.removeOldData()
     }
 
-    fun addPatientData(patientData: PatientData) {
+    fun addPatientData(patientData: Data) {
         this.patientData.merge(patientData)
     }
 

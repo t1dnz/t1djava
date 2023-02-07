@@ -217,7 +217,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
       okclient.connectionPool.evictAll()
     }
 
-    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): PatientData {
+    suspend fun getPatientData(date_from: LocalDateTime, date_to: LocalDateTime): Data {
         val fmtr = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
         val date_from_str = date_from.format(fmtr)
         val date_to_str = date_to.format(fmtr)
@@ -228,7 +228,7 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
             date_to = date_to_str,
             ).body()
 
-        val dc = PatientData()
+        val dc = Data()
         if (diasendPatientData == null) {
           return dc
         }
@@ -237,16 +237,16 @@ class DiasendClient(diasend_username: String, diasend_password: String) {
             var ld = d.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
             when (d.type) {
                 "insulin_bolus" -> {
-                    dc.insulinBoluses.add(Bolus(d.totalValue, ld))
+                    dc.boluses.add(Bolus(d.totalValue, ld))
                 }
                 "carb" -> {
                     dc.carbs.add(Carb(d.value, ld))
                 }
                 "insulin_basal" -> {
-                    dc.insulinBasalChanges.add(BasalChange(d.value, ld))
+                    dc.basal_changes.add(BasalChange(d.value, ld))
                 }
                 "glucose" -> {
-                    dc.bglReadings.add(GlucoseReading(d.value, ld))
+                    dc.glucose_readings.add(GlucoseReading(d.value, ld))
                 }
                 else -> {
                     Log.info("UNKNOWN DIASEND TYPE ${d.type}")
