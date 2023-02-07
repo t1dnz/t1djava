@@ -18,29 +18,28 @@ class T1DModel private constructor(val iobModel: IOBModel) {
 
     // This Builder pattern makes construction a bit easier
     class Builder {
-    
-        var iobModel: IOBModel = BiLinearIOB() // Default
+        fun build(profile: Profile = Profile()): T1DModel {
+            var iobModel: IOBModel = BilinearIOB() // Default
+            when(profile.iob_model) {
+                IOB_MODEL.BILINEAR -> iobModel = BilinearIOB()
+            }
 
-        fun bilinearIOBModel() = apply {
-            iobModel = BiLinearIOB()
-        }
-
-        fun build(): T1DModel {
             var t1d = T1DModel(iobModel=iobModel)
             return t1d
         }
     }
 
 
-    fun estimateBasalIOB(): Float {
-        return iobModel.estimateBasalIOB(this)
-    }
-    fun estimateBolusIOB(): Float {
-        return iobModel.estimateBolusIOB(this)
+    fun basalIOB(): Float {
+        return iobModel.basalIOB(this)
     }
 
-    fun estimateIOB(): Float {
-        return estimateBolusIOB() + estimateBasalIOB()
+    fun bolusIOB(): Float {
+        return iobModel.bolusIOB(this)
+    }
+
+    fun IOB(): Float {
+        return bolusIOB() + basalIOB()
     }
 
     // This is the information provided by the patient or their devices

@@ -10,41 +10,42 @@ import nz.t1d.datamodels.Data
 class T1DModelTest {
 
     @Test fun initializedWithSaneVariables() {
-        val sim = T1DModel.Builder().bilinearIOBModel().build()
+        val profile = Profile()
+        val t1d = T1DModel.Builder().build(profile)
         // lists
-        assertTrue(sim.insulinBoluses().isEmpty())
-        assertTrue(sim.insulinBasalChanges().isEmpty())
-        assertTrue(sim.bglReadings().isEmpty())
-        assertTrue(sim.carbs().isEmpty())
-        assertTrue(sim.recentEvents().isEmpty())
+        assertTrue(t1d.insulinBoluses().isEmpty())
+        assertTrue(t1d.insulinBasalChanges().isEmpty())
+        assertTrue(t1d.bglReadings().isEmpty())
+        assertTrue(t1d.carbs().isEmpty())
+        assertTrue(t1d.recentEvents().isEmpty())
 
         // defaults
-        assertEquals(sim.insulinDuration(), 180f)
-        assertEquals(sim.insulinOnset(), 20f)
-        assertEquals(sim.insulinPeak(), 60f)
+        assertEquals(t1d.insulinDuration(), 180f)
+        assertEquals(t1d.insulinOnset(), 20f)
+        assertEquals(t1d.insulinPeak(), 60f)
 
         // no info
         
-        assertEquals(sim.estimateBolusIOB(), 0f)
-        assertEquals(sim.estimateBasalIOB(), 0f)
-        assertEquals(sim.estimateIOB(), 0f)
-        assertEquals(sim.insulinCurrentBasal(), 0f)
+        assertEquals(t1d.bolusIOB(), 0f)
+        assertEquals(t1d.basalIOB(), 0f)
+        assertEquals(t1d.IOB(), 0f)
+        assertEquals(t1d.insulinCurrentBasal(), 0f)
 
-        assertEquals(sim.timeInRange(), 0f)
-        assertEquals(sim.meanBGL(), 0f)
-        assertEquals(sim.stdBGL(), 0f)
+        assertEquals(t1d.timeInRange(), 0f)
+        assertEquals(t1d.meanBGL(), 0f)
+        assertEquals(t1d.stdBGL(), 0f)
     }
 
     @Test fun returnsBasicValues() {
-        val sim = T1DModel.Builder().build()
+        val t1d = T1DModel.Builder().build()
         
         val dc = Data()
 
         dc.boluses.add(Bolus(12f, LocalDateTime.now()))
         
-        sim.addData(dc)
+        t1d.addData(dc)
 
-        assertEquals(sim.estimateIOB(), 12f)
+        assertEquals(t1d.IOB(), 12f)
 
         // addBGlReading
         // 
@@ -52,12 +53,12 @@ class T1DModelTest {
     }
 
     // @Test fun insulinSettingsCanChange() {
-    //     val sim = T1DModel.Builder.build()
-    //     sim.insulinDuration = 100f
-    //     sim.insulinOnset =  10f
-    //     sim.insulinPeak = 20f
+    //     val t1d = T1DModel.Builder.build()
+    //     t1d.insulinDuration = 100f
+    //     t1d.insulinOnset =  10f
+    //     t1d.insulinPeak = 20f
 
-    //     assertEquals(sim.insulinDuration, 100f)
+    //     assertEquals(t1d.insulinDuration, 100f)
     // }
 
 

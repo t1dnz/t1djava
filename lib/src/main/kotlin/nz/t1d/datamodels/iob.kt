@@ -11,12 +11,13 @@ import kotlin.NotImplementedError
 
 // Insulin on board models
 interface IOBModel {
-    fun estimateBasalIOB(t1d: T1DModel): Float
-    fun estimateBolusIOB(t1d: T1DModel): Float
+    fun basalIOB(t1d: T1DModel): Float
+    fun bolusIOB(t1d: T1DModel): Float
 }
 
-class BiLinearIOB(): IOBModel {
-   override fun estimateBasalIOB(t1d: T1DModel): Float {
+
+class BilinearIOB(): IOBModel {
+   override fun basalIOB(t1d: T1DModel): Float {
         var iob : Float = 0f
         for (d in this.insulinBasalBoluses(t1d)) {
             val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d)
@@ -27,7 +28,7 @@ class BiLinearIOB(): IOBModel {
         
     }
 
-    override fun estimateBolusIOB(t1d: T1DModel): Float {
+    override fun bolusIOB(t1d: T1DModel): Float {
         var iob: Float  = 0f
         for (d in t1d.insulinBoluses()) {
             val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d)

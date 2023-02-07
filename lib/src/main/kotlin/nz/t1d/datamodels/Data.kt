@@ -187,11 +187,14 @@ data class Data(
 
 }
 
+enum class IOB_MODEL(val type: String){BILINEAR("BILINEAR")}
+
 @Serializable
 data class Profile(
     var insulin_duration:  Int = 180,
     var insulin_onset: Int =  20,
     var insulin_peak: Int =  10,
+    var iob_model: IOB_MODEL = IOB_MODEL.BILINEAR
 )
 
 ////

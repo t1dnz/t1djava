@@ -18,7 +18,7 @@ class ModelsTest {
         BasalChange(value=1.2f, time=LocalDateTime.now())
     }
     
-    @Test fun SerializesDeserializes() {
+    @Test fun SerializesDeserializesData() {
         val now = LocalDateTime.now()
         val model = Data(
             glucose_readings = sortedSetOf(timeOrder, GlucoseReading(value=1.2f, time=now)),
@@ -30,6 +30,16 @@ class ModelsTest {
 
         val json = Json.encodeToString(model)
         val newModel = Json.decodeFromString<Data>(json)
+
+        assertEquals(model, newModel)
+    }
+
+    @Test fun SerializesDeserializesProfile() {
+
+        val model = Profile()
+        
+        val json = Json.encodeToString(model)
+        val newModel = Json.decodeFromString<Profile>(json)
 
         assertEquals(model, newModel)
     }

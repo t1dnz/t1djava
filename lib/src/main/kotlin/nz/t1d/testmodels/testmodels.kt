@@ -42,9 +42,9 @@ data class Test(
             model.addData(this.data)
         }
         
-        var estimateBolusIOB = model.estimateBolusIOB()
-        if (assert.bilinear_iob != null && assert.bilinear_iob.bolus != estimateBolusIOB) {
-            throw Exception("estimateBolusIOB is bad, was $estimateBolusIOB wanted ${assert.bilinear_iob.bolus}")
+        var bolusIOB = model.bolusIOB()
+        if (assert.bolusIOB != null && assert.bolusIOB != bolusIOB) {
+            throw Exception("bolusIOB is bad, was $bolusIOB wanted ${assert.bolusIOB}")
         }
     }
 }
@@ -52,18 +52,6 @@ data class Test(
 
 @Serializable
 data class Assertion(
-    val linear_iob: LinearIOBAssertion?,
-    val bilinear_iob: BiLinearIOBAssertion?,
-)
-
-@Serializable
-data class LinearIOBAssertion(
-    val basal: Float,
-    val bolus: Float,
-)
-
-@Serializable
-data class BiLinearIOBAssertion( 
-    val basal: Float,
-    val bolus: Float,
+    val basalIOB: Float? = null,
+    val bolusIOB: Float? = null,
 )
