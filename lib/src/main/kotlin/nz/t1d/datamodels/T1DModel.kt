@@ -13,31 +13,35 @@ import java.util.logging.Logger
 
 
 // This is the group of models used to calculate the various states of t1d, e.g. insulin on board...
-class T1DModel private constructor(var iobModel: IOBModel = NullIOBModel() ): IOBModel by iobModel {
+class T1DModel private constructor(val iobModel: IOBModel) {
     val Log = Logger.getLogger(this.javaClass.name)
 
     // This Builder pattern makes construction a bit easier
     class Builder {
-        var t1d = T1DModel()
-
-        var iobModel: IOBModel = NullIOBModel()
-        var iobModelSet: Boolean = false
+    
+        var iobModel: IOBModel = BiLinearIOB() // Default
 
         fun bilinearIOBModel() = apply {
-            t1d.iobModel = BiLinearIOB(t1d)
-            iobModelSet = true
+            iobModel = BiLinearIOB()
         }
 
-        fun build(validate: Boolean = true): T1DModel {
-            if (validate) {
-                if(!iobModelSet) {
-                    throw Exception("IOBModel not set")
-                }
-            }
+        fun build(): T1DModel {
+            var t1d = T1DModel(iobModel=iobModel)
             return t1d
         }
     }
 
+
+    fun estimateBasalIOB(): Float {
+        return iobModel.estimateBasalIOB(this)
+    }
+    fun estimateBolusIOB(): Float {
+        return iobModel.estimateBolusIOB(this)
+    }
+
+    fun estimateIOB(): Float {
+        return estimateBolusIOB() + estimateBasalIOB()
+    }
 
     // This is the information provided by the patient or their devices
     // Some of it is a guess, some of it is incorrect, some of the data might be conflicting
@@ -116,9 +120,14 @@ class T1DModel private constructor(var iobModel: IOBModel = NullIOBModel() ): IO
     ///////
     
     fun timeInRange(): Float {
+        val todaysReadings = todaysBGLReadings()
+        if (todaysReadings.isEmpty()) {
+            return 0f
+        }
+
         var todayTotalReadings = 0f
         var todayTotalInrangeReadings = 0f
-        for (d in todaysBGLReadings()) {
+        for (d in todaysReadings) {
             todayTotalReadings += 1
             if (d.value >= 3.9 && d.value <= 10) {
                 todayTotalInrangeReadings += 1
@@ -129,9 +138,14 @@ class T1DModel private constructor(var iobModel: IOBModel = NullIOBModel() ): IO
     }
 
     fun meanBGL(): Float {
+        val todaysReadings = todaysBGLReadings()
+        if (todaysReadings.isEmpty()) {
+            return 0f
+        }
+
         var todayTotalReadings = 0f
         var sumTotalReadings = 0f
-        for (d in todaysBGLReadings()) {
+        for (d in todaysReadings) {
             todayTotalReadings += 1
             sumTotalReadings += d.value
         }
@@ -140,10 +154,15 @@ class T1DModel private constructor(var iobModel: IOBModel = NullIOBModel() ): IO
     }
 
     fun stdBGL(): Float {
+        val todaysReadings = todaysBGLReadings()
+        if (todaysReadings.isEmpty()) {
+            return 0f
+        }
+
         var todayTotalReadings = 0f
         var cmeanBGL = this.meanBGL()
         var tmpSTD: Double = 0.0;
-        for (d in todaysBGLReadings()) {
+        for (d in todaysReadings) {
             todayTotalReadings +=1
             tmpSTD += Math.pow((d.value - cmeanBGL).toDouble(), 2.0)
             

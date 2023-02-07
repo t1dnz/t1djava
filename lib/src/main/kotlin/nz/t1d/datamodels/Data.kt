@@ -31,9 +31,9 @@ object DateAsLongSerializer : KSerializer<LocalDateTime> {
 @Serializable
 data class Data(
     var glucose_reading: List<GlucoseReading>,
-    var carbs: List<Carb>,
+    var carb: List<Carb>,
     var bolus: List<Bolus>,
-    var basal_change: List<GlucoseReading>,
+    var basal_change: List<BasalChange>,
 )
 
 @Serializable
