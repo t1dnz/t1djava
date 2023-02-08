@@ -13,8 +13,13 @@ import java.util.logging.Logger
 
 
 // This is the group of models used to calculate the various states of t1d, e.g. insulin on board...
-class T1DModel private constructor(val iobModel: IOBModel) {
+class T1DModel private constructor(val iobModel: IOBModel, val doaModel: DOAModel) {
     val Log = Logger.getLogger(this.javaClass.name)
+
+    // This is the information provided by the patient or their devices
+    // Some of it is a guess, some of it is incorrect, some of the data might be conflicting
+    // This is why it is in its own model
+    val patientData: Data = Data()
 
     // This Builder pattern makes construction a bit easier
     class Builder {
@@ -24,11 +29,19 @@ class T1DModel private constructor(val iobModel: IOBModel) {
                 IOB_MODEL.BILINEAR -> iobModel = BilinearIOB()
             }
 
-            var t1d = T1DModel(iobModel=iobModel)
+            var doaModel = LinearDOAModel(
+                insulinDuration = profile.insulin_duration.toFloat(), 
+                insulinOnset = profile.insulin_onset.toFloat(), 
+                insulinPeak= profile.insulin_peak.toFloat()
+            )
+            var t1d = T1DModel(iobModel=iobModel, doaModel=doaModel)
             return t1d
         }
     }
 
+    ////
+    // Insluin on Board Model
+    ////
 
     fun basalIOB(now:LocalDateTime = LocalDateTime.now()): Float {
         return iobModel.basalIOB(this, now)
@@ -38,28 +51,30 @@ class T1DModel private constructor(val iobModel: IOBModel) {
         return iobModel.bolusIOB(this, now)
     }
 
-    fun IOB(): Float {
-        return bolusIOB() + basalIOB()
+    fun IOB(now:LocalDateTime = LocalDateTime.now()): Float {
+        return bolusIOB(now) + basalIOB(now)
     }
 
-    // This is the information provided by the patient or their devices
-    // Some of it is a guess, some of it is incorrect, some of the data might be conflicting
-    // This is why it is in its own model
-    val patientData: Data = Data()
+    ////
+    // Insulin Duration of Action Model
+    ////
 
-    fun insulinDuration(): Float {
-        return 180f
+    fun insulinDuration(now:LocalDateTime = LocalDateTime.now()): Float {
+        return doaModel.insulinDuration(this,now)
     }
 
-    fun insulinOnset(): Float {
-        return 20f
+    fun insulinOnset(now:LocalDateTime = LocalDateTime.now()): Float {
+        return doaModel.insulinOnset(this,now)
     } 
 
-    fun insulinPeak(): Float {
-        return 60f
+    fun insulinPeak(now:LocalDateTime = LocalDateTime.now()): Float {
+        return doaModel.insulinPeak(this,now)
     } 
 
-    // input
+    ////
+    // Access to patiend data methods
+    ////
+
     fun insulinBoluses(): SortedSet<Bolus> {
         return patientData.boluses
     }
@@ -170,6 +185,10 @@ class T1DModel private constructor(val iobModel: IOBModel) {
     }
 
 
+    ////
+    // Changing and remove data
+    ////
+
     fun removeOldData() {
         patientData.removeOldData()
     }
@@ -189,7 +208,6 @@ class T1DModel private constructor(val iobModel: IOBModel) {
         // TODO process and join bolus and carbs into a single item
 
         // end of compression
-    
     }
 
     fun addBGlReading(reading: Float, time: LocalDateTime, unit: String, source: DATA_SOURCE) {
