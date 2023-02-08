@@ -6,6 +6,9 @@ import java.util.*
 
 import nz.t1d.datamodels.Data
 import nz.t1d.datamodels.Profile
+import nz.t1d.datamodels.LocalDateTimeSerializer
+import java.time.LocalDateTime
+
 
 import nz.t1d.datamodels.T1DModel
 
@@ -31,7 +34,9 @@ data class Test(
     val data: Data? = null,
     val profile: Profile? = null,
 
-    val now: String,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val now: LocalDateTime,
+
     val assert: Assertion,
 ) {
     fun runTest(testSuite: TestSuite, fileName: String, testName: String) {
@@ -44,7 +49,7 @@ data class Test(
         val t1d = T1DModel.Builder().build(profile)
         t1d.addData(testSuite.data)
         t1d.addData(this.data)
-        assert.assert(t1d, fileName, testName)
+        assert.assert(t1d, fileName, testName, now)
     }
 }
 
@@ -57,12 +62,12 @@ data class Assertion(
     var fileName = ""
     var testName = ""
 
-    fun assert(t1d: T1DModel, fileName: String, testName: String) {
+    fun assert(t1d: T1DModel, fileName: String, testName: String, now: LocalDateTime) {
         this.fileName = fileName
         this.testName = testName
 
-        assertEquals(bolusIOB, t1d.bolusIOB(), "bolusIOB") 
-        assertEquals(basalIOB, t1d.basalIOB(), "basalIOB") 
+        assertEquals(bolusIOB, t1d.bolusIOB(now), "bolusIOB") 
+        assertEquals(basalIOB, t1d.basalIOB(now), "basalIOB") 
     }
 
     fun <T> assertEquals(assertionValue : T?, modelValue: T , name: String) {

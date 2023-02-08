@@ -203,13 +203,13 @@ interface BaseDataClass {
     val time: LocalDateTime
     var value: Float
 
-    fun secondsAgo(): Long {
-        return Duration.between(time, LocalDateTime.now()).toMillis() / 1000L // toSeconds not supported yet
+    fun secondsAgo(now: LocalDateTime = LocalDateTime.now()): Long {
+        return Duration.between(time, now).toMillis() / 1000L // toSeconds not supported yet
     }
 
 
-    fun minsAgo(): Long {
-        return Duration.between(time, LocalDateTime.now()).toMinutes()
+    fun minsAgo(now:LocalDateTime = LocalDateTime.now()): Long {
+        return Duration.between(time, now).toMinutes()
     }
 
     fun minsAgoString(): String {

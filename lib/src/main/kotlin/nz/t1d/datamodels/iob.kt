@@ -11,16 +11,16 @@ import kotlin.NotImplementedError
 
 // Insulin on board models
 interface IOBModel {
-    fun basalIOB(t1d: T1DModel): Float
-    fun bolusIOB(t1d: T1DModel): Float
+    fun basalIOB(t1d: T1DModel, now: LocalDateTime): Float
+    fun bolusIOB(t1d: T1DModel, now: LocalDateTime): Float
 }
 
 
 class BilinearIOB(): IOBModel {
-   override fun basalIOB(t1d: T1DModel): Float {
+   override fun basalIOB(t1d: T1DModel, now: LocalDateTime): Float {
         var iob : Float = 0f
-        for (d in this.insulinBasalBoluses(t1d)) {
-            val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d)
+        for (d in this.insulinBasalBoluses(t1d, now)) {
+            val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d, now)
             iob += bolusesRemaingInsulin
         }
 
@@ -28,17 +28,17 @@ class BilinearIOB(): IOBModel {
         
     }
 
-    override fun bolusIOB(t1d: T1DModel): Float {
+    override fun bolusIOB(t1d: T1DModel, now: LocalDateTime): Float {
         var iob: Float  = 0f
         for (d in t1d.insulinBoluses()) {
-            val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d)
+            val bolusesRemaingInsulin = valueAfterDecay(t1d.insulinOnset(), t1d.insulinPeak(), t1d.insulinDuration(), d, now)
             iob += bolusesRemaingInsulin
         }
 
         return iob
     }
 
-    fun insulinBasalBoluses(t1d: T1DModel): SortedSet<Bolus> {
+    fun insulinBasalBoluses(t1d: T1DModel, now: LocalDateTime): SortedSet<Bolus> {
         
         // Basal insulin is much harder because it is changes in a curve where the integral is the total.
         var insulinBasalBoluses: SortedSet<Bolus> = sortedSetOf(timeOrder)
@@ -47,7 +47,7 @@ class BilinearIOB(): IOBModel {
             return insulinBasalBoluses
         }
         // Get now every 4 minutes calculate the basal rate, add that value as a bolusChange to insulinBasalBoluses
-        var basalTime = LocalDateTime.now()
+        var basalTime = now
         var insulinBasalChangesList = ArrayDeque(t1d.insulinBasalChanges().toMutableList())
         var currentBasal = insulinBasalChangesList.first()
         var isEmpty = false
@@ -74,7 +74,7 @@ class BilinearIOB(): IOBModel {
         return insulinBasalBoluses
     }
 
-    fun valueAfterDecay(onset: Float, peak: Float, dia: Float, datum: BaseDataClass): Float {
+    fun valueAfterDecay(onset: Float, peak: Float, dia: Float, datum: BaseDataClass, now: LocalDateTime): Float {
         // This is taken from the Bilinear algorithm here https://openaps.readthedocs.io/en/latest/docs/While%20You%20Wait%20For%20Gear/understanding-insulin-on-board-calculations.html
         // actual code here https://github.com/openaps/oref0/blob/88cf032aa74ff25f69464a7d9cd601ee3940c0b3/lib/iob/calculate.js#L36
         // basically insulin rate increases linearly from start to peak, then decreases linearly from peak to dia
@@ -82,7 +82,7 @@ class BilinearIOB(): IOBModel {
         // TODO: maybe use the exponential insulin curves also described on the page above
         // TODO: take onset into consideration by squashing triangle a bit
 
-        val minsAgo = datum.minsAgo().toFloat()
+        val minsAgo = datum.minsAgo(now).toFloat()
         if (minsAgo >= dia) {
             return 0f
         }

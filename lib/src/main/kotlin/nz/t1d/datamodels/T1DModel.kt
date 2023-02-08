@@ -30,12 +30,12 @@ class T1DModel private constructor(val iobModel: IOBModel) {
     }
 
 
-    fun basalIOB(): Float {
-        return iobModel.basalIOB(this)
+    fun basalIOB(now:LocalDateTime = LocalDateTime.now()): Float {
+        return iobModel.basalIOB(this, now)
     }
 
-    fun bolusIOB(): Float {
-        return iobModel.bolusIOB(this)
+    fun bolusIOB(now:LocalDateTime = LocalDateTime.now()): Float {
+        return iobModel.bolusIOB(this, now)
     }
 
     fun IOB(): Float {
