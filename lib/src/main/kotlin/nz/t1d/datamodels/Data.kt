@@ -74,7 +74,6 @@ data class Data(
     }
 
     fun removeOldData() {
-        val now = LocalDateTime.now()
         val midnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
         val midnightMinus = midnight.minusMinutes(300L)
         
@@ -179,9 +178,9 @@ data class Data(
 
     fun addBGlReading(reading: Float, time: LocalDateTime, unit: String, source: DATA_SOURCE) {
         // store previoud data
-        val reading = GlucoseReading(reading, time, unit)
-        reading.source = source
-        glucose_readings.add(reading)
+        val glucose_reading = GlucoseReading(reading, time, unit)
+        glucose_reading.source = source
+        glucose_readings.add(glucose_reading)
         processBGLReadings()
     }
 
@@ -191,7 +190,7 @@ enum class IOB_MODEL(val type: String){BILINEAR("BILINEAR")}
 
 @Serializable
 data class Profile(
-    var insulin_duration:  Int = 180,
+    var insulin_duration: Int = 180,
     var insulin_onset: Int =  20,
     var insulin_peak: Int =  10,
     var iob_model: IOB_MODEL = IOB_MODEL.BILINEAR

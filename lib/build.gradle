@@ -12,6 +12,8 @@ plugins {
 
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.22'
     
+    id 'com.adarshr.test-logger' version '3.2.0' // Makes the test output better
+    
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
 }

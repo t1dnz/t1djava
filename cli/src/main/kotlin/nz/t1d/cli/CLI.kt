@@ -36,7 +36,7 @@ fun testCommand(): CliktCommand {
         override fun run() {            
             val filetext = file.readText()
             val result = Yaml.default.decodeFromString(TestSuite.serializer(), filetext)
-            result.runTest()
+            result.runTest(file.getName())
         }
     }
     return TestCommand()

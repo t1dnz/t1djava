@@ -2,6 +2,7 @@ package nz.t1d.testmodels
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.test.fail
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 
@@ -22,8 +23,14 @@ class ModelsTest {
 
     @Test fun YAMLTest() {
         for (filePath in listOfFiles) {
-            val result = Yaml.default.decodeFromString(TestSuite.serializer(), File(filePath).readText())
-            result.runTest()
+            var file = File(filePath)
+            val result = Yaml.default.decodeFromString(TestSuite.serializer(), file.readText())
+            try {
+                result.runTest(file.getName())
+            }
+            catch (e: Exception) {
+                fail(e.message)
+            }
         }    
     }
 

@@ -174,8 +174,11 @@ class T1DModel private constructor(val iobModel: IOBModel) {
         patientData.removeOldData()
     }
 
-    fun addData(patientData: Data) {
-        this.patientData.merge(patientData)
+    fun addData(data: Data?) {
+        if (data == null) {
+            return
+        }
+        this.patientData.merge(data)
     }
 
     fun processData() {
