@@ -193,6 +193,9 @@ data class Profile(
     var insulin_duration: Int = 180,
     var insulin_onset: Int =  20,
     var insulin_peak: Int =  10,
+    var carb_ratio: List<Double> = listOf(),
+    var isf_ratio: List<Double> = listOf(),
+    var basal_rate: List<Double> = listOf(),
     var iob_model: IOB_MODEL = IOB_MODEL.BILINEAR
 )
 
