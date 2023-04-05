@@ -8,6 +8,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.required
 import nz.t1d.clients.diasend.*
+import nz.t1d.clients.ns.*
 import java.time.LocalDateTime 
 import kotlinx.coroutines.*
 import com.charleskorn.kaml.Yaml
@@ -26,7 +27,8 @@ fun main(args: Array<String>) {
 
     T1DCLI().subcommands(
         testCommand(),
-        diasendCommand()
+        diasendCommand(),
+        nightscoutCommand(),
     ).main(args)
 }
 
@@ -40,6 +42,60 @@ fun testCommand(): CliktCommand {
         }
     }
     return TestCommand()
+}
+
+fun nightscoutCommand(): CliktCommand {
+    class Nightscout: CliktCommand(help = "nightscout client interface") {
+        override fun run() = Unit
+    }
+
+    //
+    // date -v-2d -u +"%Y-%m-%dT%H:%M:%SZ" Date minus 2 days
+    //
+    class Treatments: CliktCommand(help = "fetch patient data") {
+        val dateFromStr by option( "-f", "--date-from", help = "date-from").default(LocalDateTime.now().minusHours(1).toString())
+        val dateToStr by option(  "-t", "--date-to", help = "date-to").default(LocalDateTime.now().toString())
+
+        val url by option( "-u", "--url", help = "url").required()
+
+        override fun run() = runBlocking {
+            val dateFrom = LocalDateTime.parse(dateFromStr)
+            val dateTo = LocalDateTime.parse(dateToStr)
+
+            val dc = NightscoutClient(url)
+            
+            launch {
+                try {
+                    var treatments = dc.getTreatments(date_from=dateFrom, date_to = dateTo)
+                    var entries = dc.getEntries(date_from=dateFrom, date_to = dateTo)
+                    treatments.merge(entries)
+
+                    var basal = dc.getCurrentBasal()
+                    var iob = dc.getIOB()
+                    
+                    println("#####")
+                    println(basal)
+                    println(iob)
+                    println(treatments)
+
+                    println("#####")
+                } catch (ex: Exception) {
+                    println(ex)
+                }
+                dc.closeConnections()
+            }
+            
+            println()
+            // TODO output to a standard file format
+        }
+    }
+
+    val ns = Nightscout()
+    val treatments = Treatments()
+    
+    ns.subcommands(treatments)
+
+    return ns
 }
 
 fun diasendCommand(): CliktCommand {

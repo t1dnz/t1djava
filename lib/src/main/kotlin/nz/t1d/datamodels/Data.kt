@@ -186,6 +186,12 @@ data class Data(
 
 }
 
+data class IOBTotals(
+    val iob: Float,
+    val bolusIOB: Float,
+    val basalIOB: Float
+)
+
 enum class IOB_MODEL(val type: String){BILINEAR("BILINEAR")}
 
 @Serializable
