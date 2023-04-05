@@ -10,8 +10,8 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.*
+import java.time.format.*
 import java.util.*
 import java.util.logging.Logger
 import nz.t1d.datamodels.*
@@ -47,8 +47,7 @@ data class Entry(
     @SerializedName("_id")
     val id: String,
     @SerializedName("dateString")
-    @Contextual
-    val date: Date,
+    val date: String,
     @SerializedName("sgv")
     val sgv: Float?,
     @SerializedName("delta")
@@ -57,8 +56,9 @@ data class Entry(
     val direction: String?,
 ) { 
     fun getDate(): LocalDateTime {
-        var utc = this.date.toInstant().atZone(ZoneOffset.UTC)
-        return utc.toLocalDateTime()
+        var utc = Instant.parse(this.date).atZone(ZoneOffset.UTC)
+        var ldt = utc.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+        return ldt
     }
 }
 
@@ -69,8 +69,7 @@ data class Treatment(
     @SerializedName("eventType")
     val eventType: String,
     @SerializedName("created_at")
-    @Contextual
-    val createdAt: Date,
+    val createdAt: String,
     @SerializedName("rate")
     val rate: Float?,
     @SerializedName("carbs")
@@ -79,9 +78,9 @@ data class Treatment(
     val insulin: Float?,
 ) { 
     fun getDate(): LocalDateTime {
-        this.createdAt
-        var utc = this.createdAt.toInstant().atZone(ZoneOffset.UTC)
-        return utc.toLocalDateTime()
+        var utc = Instant.parse(this.createdAt).atZone(ZoneOffset.UTC)
+        var ldt = utc.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+        return ldt
     }
 }
 
