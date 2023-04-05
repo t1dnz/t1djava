@@ -105,12 +105,14 @@ interface Nightscout {
     suspend fun entries(
         @Query("find[dateString][\$gte]") date_from: String,
         @Query("find[dateString][\$lte]") date_to: String,
+        @Query("count") count: Int
     ): Response<List<Entry>>
 
     @GET("api/v1/treatments.json")
     suspend fun treatments(
         @Query("find[created_at][\$gte]") date_from: String,
         @Query("find[created_at][\$lte]") date_to: String,
+        @Query("count") count: Int
     ): Response<List<Treatment>>
 
     @GET("api/v2/properties/iob.json")
@@ -180,13 +182,11 @@ class NightscoutClient(url: String) {
         return basal.basal.current.totalbasal
     }
 
-    suspend fun getTreatments(date_from: LocalDateTime, date_to: LocalDateTime): Data {
-        var date_from_z = date_from.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC"))
-        var date_to_z = date_to.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC"))
-       
+    suspend fun getTreatments(date_from: LocalDateTime, date_to: LocalDateTime): Data {       
         val nsTreatments = nightscoutClient.treatments(
-            date_from = date_from_z.format(fmtr),
-            date_to = date_to_z.format(fmtr),
+            date_from = date_from.format(fmtr),
+            date_to = date_to.format(fmtr),
+            count=100
         ).body()
 
         val dc = Data()
@@ -214,12 +214,10 @@ class NightscoutClient(url: String) {
     }
 
     suspend fun getEntries(date_from: LocalDateTime, date_to: LocalDateTime): Data {
-        var date_from_z = date_from.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC"))
-        var date_to_z = date_to.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC"))
-
         val nsEntires = nightscoutClient.entries(
-            date_from = date_from_z.format(fmtr),
-            date_to = date_to_z.format(fmtr),
+            date_from = date_from.format(fmtr),
+            date_to = date_to.format(fmtr),
+            count=400
         ).body()
 
         val dc = Data()

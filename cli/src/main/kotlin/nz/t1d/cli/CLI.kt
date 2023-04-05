@@ -9,7 +9,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.required
 import nz.t1d.clients.diasend.*
 import nz.t1d.clients.ns.*
-import java.time.LocalDateTime 
+import java.time.* 
 import kotlinx.coroutines.*
 import com.charleskorn.kaml.Yaml
 import java.io.File
@@ -59,15 +59,22 @@ fun nightscoutCommand(): CliktCommand {
         val url by option( "-u", "--url", help = "url").required()
 
         override fun run() = runBlocking {
-            val dateFrom = LocalDateTime.parse(dateFromStr)
-            val dateTo = LocalDateTime.parse(dateToStr)
+            // val dateFrom = LocalDateTime.parse(dateFromStr)
+            // val dateTo = LocalDateTime.parse(dateToStr)
+
+            val dateFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
+            val dateTo = LocalDateTime.now().plusMinutes(10)
+            
+            // Convert from local timezone into UTC LocalDateTime
+            val dfz = dateFrom.atZone(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
+            val dtz = dateTo.atZone(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
 
             val dc = NightscoutClient(url)
             
             launch {
                 try {
-                    var treatments = dc.getTreatments(date_from=dateFrom, date_to = dateTo)
-                    var entries = dc.getEntries(date_from=dateFrom, date_to = dateTo)
+                    var treatments = dc.getTreatments(date_from=dfz, date_to = dtz)
+                    var entries = dc.getEntries(date_from=dfz, date_to = dtz)
                     treatments.merge(entries)
 
                     var basal = dc.getCurrentBasal()
