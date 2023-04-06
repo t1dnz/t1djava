@@ -76,7 +76,7 @@ data class Data(
     fun removeOldData() {
         val midnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
         val midnightMinus = midnight.minusMinutes(300L)
-        
+
         // Since this program can run for days to make sure we are discarding any really old data we remove it from the sets here
         boluses.removeIf { d -> d.time < midnightMinus }
         carbs.removeIf { d -> d.time < midnightMinus }
@@ -142,18 +142,19 @@ data class Data(
         for (re in removeElemets) {
             basal_changes.remove(re)
         }
-        
+
     }
 
      fun joinTogetherBolusInfo() {
         // We want to find events in a time range
         // We want to join the boluses with carbs
         for (bolus in boluses) {
-            val closeCarbs: List<Carb> = findEvents(bolus.time, bolus.time.plusMinutes(2), carbs)
-            if (!closeCarbs.isEmpty()) {
-                bolus.carbIntake = closeCarbs.first()
-                carbs.remove(bolus.carbIntake)
+            val closeCarbs: List<Carb> = findEvents(bolus.time.minusMinutes(3), bolus.time.plusMinutes(3), carbs)
+            if (closeCarbs.isEmpty()) {
+                continue
             }
+            bolus.carbIntake = closeCarbs.first()
+            carbs.remove(bolus.carbIntake)
         }
     }
 

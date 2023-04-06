@@ -62,7 +62,7 @@ fun nightscoutCommand(): CliktCommand {
             // val dateFrom = LocalDateTime.parse(dateFromStr)
             // val dateTo = LocalDateTime.parse(dateToStr)
 
-            val dateFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
+            val dateFrom =  LocalDateTime.now().minusMinutes(100)
             val dateTo = LocalDateTime.now().plusMinutes(10)
             
             // Convert from local timezone into UTC LocalDateTime
@@ -74,9 +74,10 @@ fun nightscoutCommand(): CliktCommand {
             launch {
                 try {
                     var treatments = dc.getTreatments(date_from=dfz, date_to = dtz)
-                    var entries = dc.getEntries(date_from=dfz, date_to = dtz)
-                    treatments.merge(entries)
+                    // var entries = dc.getEntries(date_from=dfz, date_to = dtz)
+                    // treatments.merge(entries)
 
+                    treatments.joinTogetherBolusInfo()
                     var basal = dc.getCurrentBasal()
                     var iob = dc.getIOB()
                     
